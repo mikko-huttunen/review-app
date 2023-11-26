@@ -4,6 +4,7 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import Keycloak from 'keycloak-js';
+import { createUser } from './User/UserInfo';
 
 let initOptions = {
   url: 'http://localhost:8080/',
@@ -20,13 +21,15 @@ kc.init({
   silentCheckSsoRedirectUri: window.location.origin + "/silent-check-sso.html", 
   checkLoginIframe: false,
   pkceMethod: 'S256'
-}).then((auth) => {
+}).then(async (auth) => {
   if (!auth) {
     window.location.reload();
   } else {
-    console.info("Authenticated");
-    console.log('auth', auth)
-    console.log('Keycloak', kc)
+    console.log('Keycloak', kc);
+    const userData = await kc.loadUserProfile();
+    console.log('userData', userData);
+    const user = createUser({ id: userData.id, username: userData.username, email: userData.email });
+    console.log('user', user);
     kc.onTokenExpired = () => {
       console.log('token expired')
     }
